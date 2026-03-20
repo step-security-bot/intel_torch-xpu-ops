@@ -175,6 +175,17 @@ runs:
         else
           pip install -r ./.ci/docker/requirements-ci.txt
           pip install pytest pytest-timeout pytest-xdist
+          pip install threadpoolctl
+          res="$(python -m threadpoolctl -i numpy)"
+          echo "$res"
+          if [[ "$res" == *'"internal_api": "openblas"'* ]]; then
+            if [[ "$res" == *'"architecture": "Cooperlake"'* ]]; then
+              if python -m pip list | awk '$1=="numpy"{print $2}' | grep -q '^1\.23\.'; then
+                export OPENBLAS_CORETYPE=SkylakeX
+                python -m threadpoolctl -i numpy
+              fi
+            fi
+          fi
         fi
         # install the corresponding torchao
         pip uninstall -y torchao
