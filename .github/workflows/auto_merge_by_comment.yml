@@ -18,8 +18,13 @@ jobs:
       && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
       && (startsWith(github.event.comment.body, '/merge -f') || startsWith(github.event.comment.body, '/merge'))
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
+        with:
+          egress-policy: audit
+
       - name: Get PR Info
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         id: prinfo
         with:
           script: |
@@ -34,7 +39,7 @@ jobs:
             core.setOutput('mergeable_state', pr.data.mergeable_state);
 
       - name: Check Reviews
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         id: reviews
         with:
           script: |
@@ -65,7 +70,7 @@ jobs:
 
       - name: Check CI Status
         if: ${{ !startsWith(github.event.comment.body, '/merge -f') }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         id: status
         with:
           script: |
@@ -119,7 +124,7 @@ jobs:
             }
 
       - name: Check Merge Conflicts
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         id: conflict
         with:
           script: |
@@ -156,7 +161,7 @@ jobs:
             }
 
       - name: Merge PR
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         env:
           FORCE_MERGE: ${{ startsWith(github.event.comment.body, '/merge -f') }}
         with:
