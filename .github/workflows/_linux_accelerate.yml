@@ -66,8 +66,13 @@ jobs:
       hostname: ${{ steps.runner-info.outputs.hostname }}
       pytest_extra_args: ${{ steps.runner-info.outputs.pytest_extra_args }}
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
+        with:
+          egress-policy: audit
+
       - name: Checkout torch-xpu-ops
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Get runner
         id: runner-info
         uses: ./.github/actions/get-runner
@@ -96,18 +101,23 @@ jobs:
       transformers: ${{ inputs.transformers != '' && inputs.transformers || 'v4.51.3' }}
       python: ${{ inputs.python != '' && inputs.python || '3.10' }}
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
+        with:
+          egress-policy: audit
+
       - name: Checkout torch-xpu-ops
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           path: torch-xpu-ops
       - name: Checkout Accelerate
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           repository: huggingface/accelerate
           ref: ${{ env.accelerate }}
           path: accelerate
       - name: Setup python-${{ env.python }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: ${{ env.python }}
       - name: Check python
@@ -187,7 +197,7 @@ jobs:
           pip_packages: 'accelerate transformers'
       - name: Upload Test log
         if: ${{ ! cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: Torch-XPU-Accelerate-Log-${{ github.event.pull_request.number || github.sha }}
           path: |
