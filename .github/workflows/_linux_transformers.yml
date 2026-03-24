@@ -100,6 +100,11 @@ jobs:
       hostname: ${{ steps.runner-info.outputs.hostname }}
       pytest_extra_args: ${{ steps.runner-info.outputs.pytest_extra_args }}
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
+        with:
+          egress-policy: audit
+
       - id: getver
         run: |
           # We can't just `pip index version...` and get the last available
@@ -118,7 +123,7 @@ jobs:
           echo "torchaudio=$torchaudio" | tee -a "$GITHUB_OUTPUT"
           echo "triton=$triton" | tee -a "$GITHUB_OUTPUT"
       - name: Checkout torch-xpu-ops
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Get runner
         id: runner-info
         uses: ./.github/actions/get-runner
@@ -185,12 +190,17 @@ jobs:
             cmd: '--ignore=tests/utils/test_import_utils.py tests/utils'
             filter: 'not test_load_img_url_timeout'
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
+        with:
+          egress-policy: audit
+
       - name: Checkout torch-xpu-ops
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           path: torch-xpu-ops
       - name: Checkout Transformers
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           repository: huggingface/transformers
           ref: ${{ env.transformers }}
@@ -223,7 +233,7 @@ jobs:
             if (( $SECONDS - start_time > 60 )); then false; fi
           done
       - name: Setup python-${{ env.python }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: ${{ env.python }}
       - name: Check python
@@ -296,13 +306,13 @@ jobs:
           fi
       - name: Upload reports
         if: ${{ ! cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: reports-${{ matrix.test.test_case }}-${{ github.event.pull_request.number || github.sha }}
           path: ${{ github.workspace }}/transformers/reports
       - name: Upload logs
         if: ${{ ! cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: logs-${{ matrix.test.test_case }}-${{ github.event.pull_request.number || github.sha }}
           path: ${{ github.workspace }}/transformers/logs
@@ -312,26 +322,31 @@ jobs:
     if: ${{ success() || failure() }}
     runs-on: ubuntu-24.04
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
+        with:
+          egress-policy: audit
+
       - name: Download reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: 'reports-*'
           path: 'transformers/reports/'
           merge-multiple: true
       - name: Download logs
         if: ${{ ! cancelled() }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: 'logs-*'
           path: 'transformers/logs/'
           merge-multiple: true
       - name: Checkout torch-xpu-ops
         if: ${{ ! cancelled() }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           path: torch-xpu-ops
       - name: Setup python-${{ env.python }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: ${{ env.python }}
       - name: Install pip deps
